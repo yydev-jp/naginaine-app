@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>問診票 | なぎナイン整骨院</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #4a9b6f;
+    --primary-dark: #357a56;
+    --primary-light: #6dbd90;
+    --primary-pale: #e8f5ee;
+    --primary-ultra: #f2faf5;
+    --accent: #2d7a4f;
+    --text: #1e2d24;
+    --muted: #7a9585;
+    --border: #c8e0d2;
+    --bg: #f0f8f3;
+    --white: #ffffff;
+    --red: #d94f4f;
+    --radius: 14px;
+    --shadow: 0 2px 14px rgba(74,155,111,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 50px; }
+
+  header { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, var(--primary-light) 100%); color: white; text-align: center; padding: 32px 20px 28px; position: relative; overflow: hidden; }
+  header::before { content: ''; position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.07); }
+  header::after { content: ''; display: block; height: 5px; background: linear-gradient(90deg, var(--primary-light), #a8dfc0, var(--primary-light)); position: absolute; bottom: 0; left: 0; right: 0; }
+  .header-logo { font-size: 13px; letter-spacing: 0.2em; opacity: 0.85; margin-bottom: 6px; font-weight: 300; }
+  header h1 { font-size: 26px; font-weight: 700; letter-spacing: 0.06em; margin-bottom: 4px; }
+  header .subtitle { font-size: 12px; opacity: 0.75; letter-spacing: 0.08em; }
+  .leaf-deco { position: absolute; bottom: 10px; right: 16px; font-size: 28px; opacity: 0.18; }
+
+  .progress-bar { background: var(--white); padding: 12px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(74,155,111,0.10); }
+  .progress-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+  .progress-track { height: 7px; background: var(--primary-pale); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); border-radius: 4px; transition: width 0.4s ease; width: 0%; }
+
+  .container { max-width: 600px; margin: 0 auto; padding: 20px 16px; }
+
+  .section { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; overflow: hidden; animation: fadeUp 0.4s ease both; border: 1px solid rgba(200,224,210,0.5); }
+  .section:nth-child(2){animation-delay:.05s}.section:nth-child(3){animation-delay:.1s}.section:nth-child(4){animation-delay:.15s}.section:nth-child(5){animation-delay:.2s}.section:nth-child(6){animation-delay:.25s}
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)} }
+
+  .section-header { background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%); color: white; padding: 13px 18px; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; display: flex; align-items: center; gap: 8px; }
+  .section-body { padding: 18px; }
+
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--accent); margin-bottom: 7px; }
+  label .required { color: var(--red); margin-left: 4px; font-size: 11px; }
+  .sub-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; margin-top: -4px; }
+
+  input[type="text"], input[type="date"], input[type="tel"], select, textarea {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 9px;
+    font-size: 16px; font-family: inherit; color: var(--text); background: var(--white);
+    transition: border-color 0.2s, box-shadow 0.2s; appearance: none; -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(74,155,111,0.13); }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a9b6f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+  .radio-group, .check-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .radio-group.col { flex-direction: column; gap: 7px; }
+  .radio-btn, .check-btn { position: relative; }
+  .radio-btn input, .check-btn input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .radio-btn label, .check-btn label { display: inline-flex; align-items: center; padding: 9px 16px; border: 1.5px solid var(--border); border-radius: 50px; font-size: 14px; color: var(--text); cursor: pointer; transition: all 0.15s; user-select: none; background: var(--primary-ultra); }
+  .check-btn label { border-radius: 9px; }
+  .radio-btn input:checked + label, .check-btn input:checked + label { background: var(--primary); border-color: var(--primary); color: white; font-weight: 600; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+  /* BODY MAP */
+  .body-map-hint { font-size: 12px; color: var(--primary-dark); text-align: center; background: var(--primary-pale); border-radius: 9px; padding: 9px 14px; border: 1px solid var(--border); margin-bottom: 14px; font-weight: 500; }
+  .body-views { display: flex; gap: 30px; justify-content: center; }
+  .body-view-col { display: flex; flex-direction: column; align-items: center; }
+  .body-view-label { font-size: 11px; color: var(--primary-dark); font-weight: 700; letter-spacing: 0.1em; margin-bottom: 5px; background: var(--primary-pale); padding: 3px 14px; border-radius: 50px; border: 1px solid var(--border); }
+  .body-svg { display: block; }
+  .body-region { cursor: pointer; transition: opacity 0.15s; -webkit-tap-highlight-color: transparent; }
+  .body-region:active { opacity: 0.7; }
+  .body-region .region-shape { transition: fill 0.18s, stroke 0.18s; }
+  .body-region.selected .region-shape { fill: rgba(217,79,79,0.50) !important; stroke: #b83232 !important; stroke-width: 2 !important; }
+  .body-region .region-label { font-size: 7px; fill: #5a7a66; text-anchor: middle; pointer-events: none; font-family: 'Noto Sans JP', sans-serif; }
+  .body-region.selected .region-label { fill: #8b1a1a; font-weight: bold; }
+
+  /* 左右ラベル */
+  .body-view-wrap { display: flex; align-items: center; gap: 6px; }
+  .lr-label { font-size: 12px; font-weight: 700; color: var(--primary-dark); background: var(--primary-pale); border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; line-height: 1; white-space: nowrap; }
+
+  .selected-parts-display { width: 100%; min-height: 46px; background: var(--primary-ultra); border: 1.5px solid var(--border); border-radius: 9px; padding: 10px 12px; margin-top: 14px; }
+  .empty-hint { font-size: 13px; color: var(--muted); font-style: italic; }
+  .selected-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .part-tag { display: inline-flex; align-items: center; gap: 5px; background: #fde8e8; border: 1px solid #f0b8b8; color: #b83232; border-radius: 50px; padding: 4px 10px 4px 12px; font-size: 12px; font-weight: 500; }
+  .part-tag .rm { cursor: pointer; font-size: 15px; line-height: 1; opacity: 0.7; padding: 0 2px; }
+  .part-tag .rm:hover { opacity: 1; }
+
+  /* PAIN SCALE */
+  .pain-scale { display: flex; gap: 4px; }
+  .pain-scale-item { position: relative; flex: 1; }
+  .pain-scale-item input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .pain-scale-item label { display: flex; align-items: center; justify-content: center; height: 42px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: var(--muted); background: var(--primary-ultra); }
+  .pain-scale-item input:checked + label { color: white; border-color: transparent; }
+  .pain-scale-item:nth-child(1) input:checked + label{background:#4aaa72}
+  .pain-scale-item:nth-child(2) input:checked + label{background:#6dbd6d}
+  .pain-scale-item:nth-child(3) input:checked + label{background:#a8cc55;color:#333}
+  .pain-scale-item:nth-child(4) input:checked + label{background:#d4b840;color:#333}
+  .pain-scale-item:nth-child(5) input:checked + label{background:#e89430}
+  .pain-scale-item:nth-child(6) input:checked + label{background:#e06020}
+  .pain-scale-item:nth-child(7) input:checked + label{background:#d94040}
+  .pain-scale-item:nth-child(8) input:checked + label{background:#c02828}
+  .pain-scale-item:nth-child(9) input:checked + label{background:#961818}
+  .pain-scale-item:nth-child(10) input:checked + label{background:#6a0a0a}
+  .pain-scale-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+  .consent-box { background: var(--primary-pale); border: 1.5px solid var(--border); border-radius: 9px; padding: 14px; font-size: 12px; color: var(--muted); line-height: 1.8; margin-bottom: 14px; }
+  .consent-check { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+  .consent-check input[type="checkbox"] { width: 20px; height: 20px; min-width: 20px; margin-top: 2px; cursor: pointer; accent-color: var(--primary); }
+  .consent-check span { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+
+  .submit-btn { width: 100%; background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--primary-light)); color: white; border: none; padding: 19px; border-radius: var(--radius); font-size: 17px; font-weight: 700; font-family: inherit; letter-spacing: 0.06em; cursor: pointer; box-shadow: 0 5px 22px rgba(74,155,111,0.35); transition: all 0.2s; margin-top: 8px; }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* SENDING STATE */
+  .sending-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999; align-items: center; justify-content: center; }
+  .sending-overlay.show { display: flex; }
+  .sending-box { background: white; border-radius: 16px; padding: 36px 40px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+  .spinner { width: 48px; height: 48px; border: 4px solid var(--primary-pale); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .sending-box p { font-size: 15px; color: var(--primary-dark); font-weight: 500; }
+
+  /* SUCCESS */
+  .success-screen { display: none; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 50px 24px; text-align: center; animation: fadeUp 0.5s ease; border: 1px solid var(--border); }
+  .success-screen .check-icon { width: 84px; height: 84px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 42px; margin: 0 auto 24px; animation: popIn 0.4s ease 0.1s both; }
+  @keyframes popIn { from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1} }
+  .success-screen h2 { font-size: 22px; font-weight: 700; color: var(--primary-dark); margin-bottom: 10px; }
+  .success-screen p { font-size: 14px; color: var(--muted); line-height: 1.8; }
+  .success-screen .clinic-name { font-size: 13px; color: var(--primary); font-weight: 600; margin-top: 20px; }
+
+  /* ERROR */
+  .error-box { background: #fff0f0; border: 1.5px solid #f5b8b8; border-radius: 9px; padding: 14px; font-size: 13px; color: #c0392b; margin-top: 12px; display: none; line-height: 1.6; }
+
+  .form-footer { text-align: center; font-size: 11px; color: var(--muted); margin-top: 24px; line-height: 1.6; }
+
+  /* 郵便番号 */
+  .zip-row { display: flex; gap: 10px; align-items: flex-end; }
+  .zip-row input { flex: 0 0 160px; }
+  .zip-btn {
+    flex: 1; padding: 12px 14px; background: var(--primary);
+    color: white; border: none; border-radius: 9px; font-size: 14px;
+    font-family: inherit; font-weight: 600; cursor: pointer;
+    transition: background 0.15s; white-space: nowrap;
+  }
+  .zip-btn:active { background: var(--primary-dark); }
+  .zip-status { font-size: 11px; margin-top: 5px; min-height: 16px; }
+  .zip-status.ok { color: var(--primary-dark); }
+  .zip-status.err { color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- 送信中オーバーレイ -->
+<div class="sending-overlay" id="sending-overlay">
+  <div class="sending-box">
+    <div class="spinner"></div>
+    <p>送信中です...<br>しばらくお待ちください</p>
+  </div>
+</div>
+
+<header>
+  <div class="header-logo">🌿 NAGINAINE SEIKOTSUIN</div>
+  <h1>なぎナイン整骨院</h1>
+  <p class="subtitle">問診票 / Medical Questionnaire</p>
+  <div class="leaf-deco">🌿</div>
+</header>
+
+<div class="progress-bar">
+  <div class="progress-labels"><span>📋 記入進捗</span><span id="progress-text">0%</span></div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<div class="container">
+<div id="questionnaire">
+
+  <!-- 1 基本情報 -->
+  <div class="section">
+    <div class="section-header">👤 基本情報</div>
+    <div class="section-body">
+      <div class="field"><label>お名前<span class="required">必須</span></label><input type="text" id="name" placeholder="例：山田 太郎"></div>
+      <div class="row">
+        <div class="field"><label>フリガナ<span class="required">必須</span></label><input type="text" id="kana" placeholder="ヤマダ タロウ"></div>
+        <div class="field"><label>生年月日<span class="required">必須</span></label><input type="date" id="birthday"></div>
+      </div>
+      <div class="field">
+        <label>性別<span class="required">必須</span></label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="gender" id="m" value="男性"><label for="m">男性</label></div>
+          <div class="radio-btn"><input type="radio" name="gender" id="f" value="女性"><label for="f">女性</label></div>
+          <div class="radio-btn"><input type="radio" name="gender" id="og" value="その他"><label for="og">その他</label></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field"><label>電話番号<span class="required">必須</span></label><input type="tel" id="tel" placeholder="090-0000-0000"></div>
+        <div class="field"><label>職業</label>
+          <select id="job"><option value="">選択</option><option>会社員</option><option>自営業</option><option>主婦・主夫</option><option>学生</option><option>パート・アルバイト</option><option>無職</option><option>その他</option></select>
+        </div>
+      </div>
+      <div class="field">
+        <label>郵便番号</label>
+        <div class="zip-row">
+          <input type="tel" id="zip" placeholder="例：123-4567" maxlength="8" inputmode="numeric">
+          <button class="zip-btn" onclick="lookupZip()">📍 住所を検索</button>
+        </div>
+        <div class="zip-status" id="zip-status"></div>
+      </div>
+      <div class="field">
+        <label>都道府県・市区町村</label>
+        <input type="text" id="address1" placeholder="例：大阪府大阪市北区">
+      </div>
+      <div class="field">
+        <label>番地・建物名</label>
+        <input type="text" id="address2" placeholder="例：梅田1-2-3 ○○マンション101">
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 来院 -->
+  <div class="section">
+    <div class="section-header">🚪 来院のきっかけ</div>
+    <div class="section-body">
+      <div class="field">
+        <label>初めてのご来院ですか？<span class="required">必須</span></label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="visit" id="v1" value="初診"><label for="v1">初めて</label></div>
+          <div class="radio-btn"><input type="radio" name="visit" id="v2" value="再診"><label for="v2">以前来たことがある</label></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>何でお知りになりましたか？</label>
+        <div class="check-group">
+          <div class="check-btn"><input type="checkbox" id="r1" value="ご紹介"><label for="r1">ご紹介</label></div>
+          <div class="check-btn"><input type="checkbox" id="r2" value="ネット検索"><label for="r2">ネット検索</label></div>
+          <div class="check-btn"><input type="checkbox" id="r3" value="SNS"><label for="r3">SNS</label></div>
+          <div class="check-btn"><input type="checkbox" id="r4" value="チラシ"><label for="r4">チラシ</label></div>
+          <div class="check-btn"><input type="checkbox" id="r5" value="看板"><label for="r5">看板</label></div>
+          <div class="check-btn"><input type="checkbox" id="r6" value="その他"><label for="r6">その他</label></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 症状 -->
+  <div class="section">
+    <div class="section-header">🩺 症状・お体の状態</div>
+    <div class="section-body">
+      <div class="field">
+        <label>痛い・辛い部位をタッチしてください<span class="required">必須</span></label>
+        <div class="sub-label">前面・背面の体の図を直接タップ。複数選択できます。</div>
+        <div class="body-map-hint">🌿 体の図の部位をタップ → 赤くなったら選択済み</div>
+        <div class="body-views">
+          <div class="body-view-col">
+            <div class="body-view-label">前　面</div>
+            <div class="body-view-wrap">
+              <span class="lr-label">右</span>
+              <div id="front-svg-wrap"><svg class="body-svg" width="130" height="300" viewBox="0 0 140 300">
+              <!-- 頭部：前面は丸く顔っぽく -->
+              <g class="body-region" data-part="頭部">
+                <ellipse class="region-shape" cx="70" cy="26" rx="22" ry="24" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+                <!-- 顔のライン（目・鼻のほのめかし） -->
+                <ellipse cx="63" cy="24" rx="3" ry="2" fill="rgba(80,140,100,0.3)" pointer-events="none"/>
+                <ellipse cx="77" cy="24" rx="3" ry="2" fill="rgba(80,140,100,0.3)" pointer-events="none"/>
+                <path d="M65 32 Q70 36 75 32" fill="none" stroke="rgba(80,140,100,0.35)" stroke-width="1.2" pointer-events="none"/>
+              </g>
+              <!-- 首 -->
+              <g class="body-region" data-part="首・頸部">
+                <rect class="region-shape" x="62" y="49" width="16" height="14" rx="4" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 左肩（前面は肩が張り出す） -->
+              <g class="body-region" data-part="左肩">
+                <ellipse class="region-shape" cx="30" cy="72" rx="17" ry="11" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 右肩 -->
+              <g class="body-region" data-part="右肩">
+                <ellipse class="region-shape" cx="110" cy="72" rx="17" ry="11" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 胸部：左右に分割 -->
+              <g class="body-region" data-part="左胸部">
+                <path class="region-shape" d="M46 63 Q70 58 70 63 L70 108 Q42 108 42 108 Q40 80 46 63 Z" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <g class="body-region" data-part="右胸部">
+                <path class="region-shape" d="M70 63 Q94 63 94 63 Q100 80 98 108 L70 108 Z" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 中心線 -->
+              <line x1="70" y1="63" x2="70" y2="108" stroke="rgba(80,140,100,0.35)" stroke-width="1.2" pointer-events="none"/>
+              <!-- 腹部：左右に分割 -->
+              <g class="body-region" data-part="左腹部">
+                <path class="region-shape" d="M42 108 Q70 114 70 108 L70 148 Q70 154 44 148 Z" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <g class="body-region" data-part="右腹部">
+                <path class="region-shape" d="M70 108 Q98 108 98 108 L96 148 Q70 154 70 148 Z" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 中心線 -->
+              <line x1="70" y1="108" x2="70" y2="148" stroke="rgba(80,140,100,0.35)" stroke-width="1.2" pointer-events="none"/>
+              <!-- 骨盤・股関節：前面は骨盤が広がる -->
+              <g class="body-region" data-part="骨盤・股関節">
+                <path class="region-shape" d="M44 148 Q70 154 96 148 Q100 162 96 178 Q70 180 44 178 Q40 162 44 148 Z" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 左上腕 -->
+              <g class="body-region" data-part="左上腕">
+                <rect class="region-shape" x="11" y="68" width="19" height="42" rx="9" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 右上腕 -->
+              <g class="body-region" data-part="右上腕">
+                <rect class="region-shape" x="110" y="68" width="19" height="42" rx="9" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 左肘・前腕 -->
+              <g class="body-region" data-part="左肘・前腕">
+                <rect class="region-shape" x="10" y="110" width="17" height="38" rx="7" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 右肘・前腕 -->
+              <g class="body-region" data-part="右肘・前腕">
+                <rect class="region-shape" x="113" y="110" width="17" height="38" rx="7" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 左手首・手 -->
+              <g class="body-region" data-part="左手首・手">
+                <ellipse class="region-shape" cx="19" cy="161" rx="10" ry="13" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 右手首・手 -->
+              <g class="body-region" data-part="右手首・手">
+                <ellipse class="region-shape" cx="121" cy="161" rx="10" ry="13" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 左太もも -->
+              <g class="body-region" data-part="左太もも">
+                <path class="region-shape" d="M44 180 Q56 178 64 182 L62 228 Q54 232 44 228 Z" rx="8" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 右太もも -->
+              <g class="body-region" data-part="右太もも">
+                <path class="region-shape" d="M76 182 Q84 178 96 180 L96 228 Q86 232 78 228 Z" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 左ひざ -->
+              <g class="body-region" data-part="左ひざ">
+                <ellipse class="region-shape" cx="53" cy="234" rx="12" ry="8" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 右ひざ -->
+              <g class="body-region" data-part="右ひざ">
+                <ellipse class="region-shape" cx="87" cy="234" rx="12" ry="8" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 左すね・足首 -->
+              <g class="body-region" data-part="左すね・足首">
+                <path class="region-shape" d="M42 242 L64 242 L62 280 Q53 284 44 280 Z" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 右すね・足首 -->
+              <g class="body-region" data-part="右すね・足首">
+                <path class="region-shape" d="M76 242 L98 242 L96 280 Q87 284 78 280 Z" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 左足首（前面） -->
+              <g class="body-region" data-part="左足首（前面）">
+                <ellipse class="region-shape" cx="53" cy="286" rx="11" ry="7" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+              <!-- 右足首（前面） -->
+              <g class="body-region" data-part="右足首（前面）">
+                <ellipse class="region-shape" cx="87" cy="286" rx="11" ry="7" fill="rgba(110,190,140,0.22)" stroke="#7dba9a" stroke-width="1.5"/>
+              </g>
+            </svg></div>
+              <span class="lr-label">左</span>
+            </div>
+          </div>
+
+          <div class="body-view-col">
+            <div class="body-view-label">背　面</div>
+            <div class="body-view-wrap">
+              <span class="lr-label">左</span>
+              <div id="back-svg-wrap"><svg class="body-svg" width="130" height="300" viewBox="0 0 140 300">
+              <!-- 後頭部：後ろは後頭部が丸い -->
+              <g class="body-region" data-part="後頭部">
+                <ellipse class="region-shape" cx="70" cy="26" rx="22" ry="24" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+                <!-- 後ろ髪ライン -->
+                <path d="M52 36 Q60 44 70 46 Q80 44 88 36" fill="none" stroke="rgba(60,120,80,0.3)" stroke-width="1.5" pointer-events="none"/>
+              </g>
+              <!-- 首の後ろ -->
+              <g class="body-region" data-part="首の後ろ">
+                <rect class="region-shape" x="62" y="49" width="16" height="14" rx="4" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 左肩（背面）：肩甲骨がある側 -->
+              <g class="body-region" data-part="左肩（背面）">
+                <ellipse class="region-shape" cx="30" cy="72" rx="17" ry="11" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 右肩（背面） -->
+              <g class="body-region" data-part="右肩（背面）">
+                <ellipse class="region-shape" cx="110" cy="72" rx="17" ry="11" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 背中（上部）：肩甲骨のラインを入れる -->
+              <!-- 背中（上部）：左右に分割 -->
+              <g class="body-region" data-part="左背中（上部）">
+                <path class="region-shape" d="M46 63 Q70 60 70 63 L70 108 Q44 108 44 108 Q42 80 46 63 Z" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+                <path d="M52 70 Q58 80 54 96" fill="none" stroke="rgba(60,120,80,0.3)" stroke-width="1.5" pointer-events="none"/>
+              </g>
+              <g class="body-region" data-part="右背中（上部）">
+                <path class="region-shape" d="M70 63 Q94 63 94 63 Q98 80 96 108 L70 108 Z" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+                <path d="M88 70 Q82 80 86 96" fill="none" stroke="rgba(60,120,80,0.3)" stroke-width="1.5" pointer-events="none"/>
+              </g>
+              <!-- 背骨ライン -->
+              <line x1="70" y1="63" x2="70" y2="108" stroke="rgba(60,120,80,0.35)" stroke-width="1.2" pointer-events="none"/>
+              <!-- 腰：左右に分割 -->
+              <g class="body-region" data-part="左腰">
+                <path class="region-shape" d="M44 108 Q70 112 70 108 L70 148 Q70 152 46 148 Z" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <g class="body-region" data-part="右腰">
+                <path class="region-shape" d="M70 108 Q96 108 96 108 L94 148 Q70 152 70 148 Z" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 背骨ライン -->
+              <line x1="70" y1="108" x2="70" y2="148" stroke="rgba(60,120,80,0.35)" stroke-width="1.2" pointer-events="none"/>
+              <!-- お尻・仙骨：背面はお尻が丸く張り出す -->
+              <g class="body-region" data-part="お尻・仙骨">
+                <path class="region-shape" d="M42 148 Q70 152 98 148 Q104 162 100 180 Q85 188 70 186 Q55 188 40 180 Q36 162 42 148 Z" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+                <!-- お尻の割れ目ライン -->
+                <path d="M70 152 Q68 165 70 180" fill="none" stroke="rgba(60,120,80,0.25)" stroke-width="1.2" pointer-events="none"/>
+              </g>
+              <!-- 左上腕（背面） -->
+              <g class="body-region" data-part="左上腕（背面）">
+                <rect class="region-shape" x="11" y="68" width="19" height="42" rx="9" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 右上腕（背面） -->
+              <g class="body-region" data-part="右上腕（背面）">
+                <rect class="region-shape" x="110" y="68" width="19" height="42" rx="9" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 左肘（背面） -->
+              <g class="body-region" data-part="左肘（背面）">
+                <rect class="region-shape" x="10" y="110" width="17" height="38" rx="7" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 右肘（背面） -->
+              <g class="body-region" data-part="右肘（背面）">
+                <rect class="region-shape" x="113" y="110" width="17" height="38" rx="7" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 左ふともも（裏）：ふくらみを出す -->
+              <g class="body-region" data-part="左ふともも（裏）">
+                <path class="region-shape" d="M40 186 Q54 182 64 186 L62 230 Q52 234 42 230 Z" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 右ふともも（裏） -->
+              <g class="body-region" data-part="右ふともも（裏）">
+                <path class="region-shape" d="M76 186 Q86 182 100 186 L98 230 Q88 234 78 230 Z" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 左ひざ裏 -->
+              <g class="body-region" data-part="左ひざ裏">
+                <ellipse class="region-shape" cx="52" cy="236" rx="12" ry="8" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 右ひざ裏 -->
+              <g class="body-region" data-part="右ひざ裏">
+                <ellipse class="region-shape" cx="88" cy="236" rx="12" ry="8" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 左ふくらはぎ：後ろは膨らみがある -->
+              <g class="body-region" data-part="左ふくらはぎ">
+                <path class="region-shape" d="M40 244 Q54 242 64 244 Q66 260 62 280 Q52 284 42 280 Q38 260 40 244 Z" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 右ふくらはぎ -->
+              <g class="body-region" data-part="右ふくらはぎ">
+                <path class="region-shape" d="M76 244 Q90 242 100 244 Q102 260 98 280 Q88 284 78 280 Q74 260 76 244 Z" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 左足首（背面） -->
+              <g class="body-region" data-part="左足首（背面）">
+                <ellipse class="region-shape" cx="52" cy="288" rx="11" ry="7" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+              <!-- 右足首（背面） -->
+              <g class="body-region" data-part="右足首（背面）">
+                <ellipse class="region-shape" cx="88" cy="288" rx="11" ry="7" fill="rgba(90,170,120,0.18)" stroke="#6aaa88" stroke-width="1.5"/>
+              </g>
+            </svg></div>
+              <span class="lr-label">右</span>
+            </div>
+          </div>
+        </div>
+        <div class="selected-parts-display" style="margin-top:14px;">
+          <div class="empty-hint" id="selected-empty">タッチした部位がここに表示されます</div>
+          <div class="selected-tags" id="selected-tags"></div>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="field">
+        <label>痛みの強さ（1〜10）<span class="required">必須</span></label>
+        <div class="sub-label">1＝ほとんど気にならない　10＝我慢できないほど</div>
+        <div class="pain-scale">
+          <div class="pain-scale-item"><input type="radio" name="pain" id="p1" value="1"><label for="p1">1</label></div>
+          <div class="pain-scale-item"><input type="radio" name="pain" id="p2" value="2"><label for="p2">2</label></div>
+          <div class="pain-scale-item"><input type="radio" name="pain" id="p3" value="3"><label for="p3">3</label></div>
+          <div class="pain-scale-item"><input type="radio" name="pain" id="p4" value="4"><label for="p4">4</label></div>
+          <div class="pain-scale-item"><input type="radio" name="pain" id="p5" value="5"><label for="p5">5</label></div>
+          <div class="pain-scale-item"><input type="radio" name="pain" id="p6" value="6"><label for="p6">6</label></div>
+          <div class="pain-scale-item"><input type="radio" name="pain" id="p7" value="7"><label for="p7">7</label></div>
+          <div class="pain-scale-item"><input type="radio" name="pain" id="p8" value="8"><label for="p8">8</label></div>
+          <div class="pain-scale-item"><input type="radio" name="pain" id="p9" value="9"><label for="p9">9</label></div>
+          <div class="pain-scale-item"><input type="radio" name="pain" id="p10" value="10"><label for="p10">10</label></div>
+        </div>
+        <div class="pain-scale-labels"><span>軽度</span><span>中程度</span><span>重度</span></div>
+      </div>
+
+      <hr class="divider">
+      <div class="field">
+        <label>いつから症状がありますか？</label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="dur" id="d1" value="今日"><label for="d1">今日</label></div>
+          <div class="radio-btn"><input type="radio" name="dur" id="d2" value="数日前"><label for="d2">数日前</label></div>
+          <div class="radio-btn"><input type="radio" name="dur" id="d3" value="1〜2週間"><label for="d3">1〜2週間</label></div>
+          <div class="radio-btn"><input type="radio" name="dur" id="d4" value="1ヶ月以上"><label for="d4">1ヶ月以上</label></div>
+          <div class="radio-btn"><input type="radio" name="dur" id="d5" value="半年以上"><label for="d5">半年以上</label></div>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="field">
+        <label>痛みの特徴（複数選択可）</label>
+        <div class="check-group">
+          <div class="check-btn"><input type="checkbox" id="s1" value="ズキズキ"><label for="s1">ズキズキ</label></div>
+          <div class="check-btn"><input type="checkbox" id="s2" value="しびれ"><label for="s2">しびれ</label></div>
+          <div class="check-btn"><input type="checkbox" id="s3" value="重い・だるい"><label for="s3">重い・だるい</label></div>
+          <div class="check-btn"><input type="checkbox" id="s4" value="突っ張り"><label for="s4">突っ張り</label></div>
+          <div class="check-btn"><input type="checkbox" id="s5" value="動くと痛い"><label for="s5">動くと痛い</label></div>
+          <div class="check-btn"><input type="checkbox" id="s6" value="安静時も痛い"><label for="s6">安静時も痛い</label></div>
+          <div class="check-btn"><input type="checkbox" id="s7" value="朝が特に辛い"><label for="s7">朝が特に辛い</label></div>
+          <div class="check-btn"><input type="checkbox" id="s8" value="夜が特に辛い"><label for="s8">夜が特に辛い</label></div>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="field">
+        <label>原因・きっかけ</label>
+        <div class="radio-group col">
+          <div class="radio-btn"><input type="radio" name="cause" id="c1" value="交通事故"><label for="c1">🚗 交通事故</label></div>
+          <div class="radio-btn"><input type="radio" name="cause" id="c2" value="仕事中のケガ（労災）"><label for="c2">💼 仕事中のケガ（労災）</label></div>
+          <div class="radio-btn"><input type="radio" name="cause" id="c3" value="スポーツ中のケガ"><label for="c3">⚽ スポーツ中のケガ</label></div>
+          <div class="radio-btn"><input type="radio" name="cause" id="c4" value="日常生活でのケガ"><label for="c4">🏠 日常生活でのケガ</label></div>
+          <div class="radio-btn"><input type="radio" name="cause" id="c5" value="心当たりがない・慢性的"><label for="c5">❓ 心当たりがない・慢性的</label></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>症状の詳細（自由記入）</label>
+        <textarea id="symptom_detail" placeholder="どのような動きで痛むか、など詳しくお書きください"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 既往歴 -->
+  <div class="section">
+    <div class="section-header">📋 現在の治療・既往歴</div>
+    <div class="section-body">
+      <div class="field">
+        <label>現在、他の病院・接骨院に通っていますか？</label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="other_h" id="oh1" value="はい"><label for="oh1">はい</label></div>
+          <div class="radio-btn"><input type="radio" name="other_h" id="oh2" value="いいえ"><label for="oh2">いいえ</label></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>服薬中のお薬はありますか？</label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="med" id="med1" value="はい"><label for="med1">はい</label></div>
+          <div class="radio-btn"><input type="radio" name="med" id="med2" value="いいえ"><label for="med2">いいえ</label></div>
+        </div>
+      </div>
+      <div class="field" id="med_detail_f" style="display:none;"><label>お薬の名前</label><input type="text" id="med_detail" placeholder="薬の名前をご記入ください"></div>
+      <div class="field">
+        <label>過去に大きなケガや手術はありましたか？</label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="surg" id="su1" value="はい"><label for="su1">はい</label></div>
+          <div class="radio-btn"><input type="radio" name="surg" id="su2" value="いいえ"><label for="su2">いいえ</label></div>
+        </div>
+      </div>
+      <div class="field" id="surg_detail_f" style="display:none;"><label>手術・ケガの内容</label><input type="text" id="surg_detail" placeholder="例：腰椎椎間板ヘルニアの手術"></div>
+      <div class="field">
+        <label>アレルギーはありますか？</label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="alg" id="al1" value="はい"><label for="al1">はい</label></div>
+          <div class="radio-btn"><input type="radio" name="alg" id="al2" value="いいえ"><label for="al2">いいえ</label></div>
+        </div>
+      </div>
+      <div class="field" id="alg_detail_f" style="display:none;"><label>アレルギーの内容</label><input type="text" id="alg_detail" placeholder="例：金属アレルギー、花粉症など"></div>
+    </div>
+  </div>
+
+  <!-- 5 生活習慣 -->
+  <div class="section">
+    <div class="section-header">🌿 生活習慣</div>
+    <div class="section-body">
+      <div class="field">
+        <label>睡眠時間（1日平均）</label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="sleep" id="sl1" value="5時間未満"><label for="sl1">5時間未満</label></div>
+          <div class="radio-btn"><input type="radio" name="sleep" id="sl2" value="5〜7時間"><label for="sl2">5〜7時間</label></div>
+          <div class="radio-btn"><input type="radio" name="sleep" id="sl3" value="7〜9時間"><label for="sl3">7〜9時間</label></div>
+          <div class="radio-btn"><input type="radio" name="sleep" id="sl4" value="9時間以上"><label for="sl4">9時間以上</label></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>運動習慣</label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="ex" id="ex1" value="ほとんどしない"><label for="ex1">ほとんどしない</label></div>
+          <div class="radio-btn"><input type="radio" name="ex" id="ex2" value="週1〜2回"><label for="ex2">週1〜2回</label></div>
+          <div class="radio-btn"><input type="radio" name="ex" id="ex3" value="週3回以上"><label for="ex3">週3回以上</label></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>デスクワーク・スマホ使用時間</label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="desk" id="de1" value="2時間未満"><label for="de1">2時間未満</label></div>
+          <div class="radio-btn"><input type="radio" name="desk" id="de2" value="2〜5時間"><label for="de2">2〜5時間</label></div>
+          <div class="radio-btn"><input type="radio" name="desk" id="de3" value="5時間以上"><label for="de3">5時間以上</label></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>女性の方：妊娠中または可能性がありますか？</label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="preg" id="pr1" value="はい"><label for="pr1">はい</label></div>
+          <div class="radio-btn"><input type="radio" name="preg" id="pr2" value="いいえ"><label for="pr2">いいえ</label></div>
+          <div class="radio-btn"><input type="radio" name="preg" id="pr3" value="非該当"><label for="pr3">非該当</label></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 同意 -->
+  <div class="section">
+    <div class="section-header">✅ 個人情報の取り扱いと同意</div>
+    <div class="section-body">
+      <div class="consent-box">ご記入いただいた個人情報は、なぎナイン整骨院における施術・医療サービスの提供のみに使用いたします。第三者への提供は法令に基づく場合を除き行いません。</div>
+      <label class="consent-check">
+        <input type="checkbox" id="consent">
+        <span>上記の内容を理解し、個人情報の取り扱いに同意します</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>その他のご要望・ご質問</label>
+    <textarea id="other" placeholder="施術に関する不安点やご希望があればご記入ください"></textarea>
+  </div>
+
+  <div class="error-box" id="error-box">
+    ⚠️ 送信に失敗しました。通信環境を確認して再度お試しください。<br>
+    問題が続く場合はスタッフにお声がけください。
+  </div>
+
+  <button class="submit-btn" id="submit-btn" onclick="submitForm()">🌿 問診票を送信する →</button>
+  <div class="form-footer">なぎナイン整骨院 / ご不明な点は受付スタッフまでお気軽にお声がけください</div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-screen" id="success-screen">
+  <div class="check-icon">✓</div>
+  <h2>ご記入ありがとうございます</h2>
+  <p>問診票の送信が完了しました。<br>受付までお声がけください。<br><br>お体の回復のため、<br>精一杯サポートいたします。</p>
+  <p class="clinic-name">🌿 なぎナイン整骨院</p>
+</div>
+
+</div>
+
+<script>
+// ============================================================
+// ★ ここにApps ScriptのURLを貼り付けてください ★
+// 例: https://script.google.com/macros/s/xxxxxx/exec
+// ============================================================
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxYMnjVHfhS3Zv9egjYisup5RtLaSJvq9Yg7I0CbT3sMuXY4KCiolYAJ8623x7UIN6qvg/exec";
+
+// ===== 郵便番号検索 =====
+async function lookupZip() {
+  const raw = document.getElementById('zip').value.replace(/[^0-9]/g, '');
+  const statusEl = document.getElementById('zip-status');
+  if (raw.length !== 7) {
+    statusEl.className = 'zip-status err';
+    statusEl.textContent = '⚠️ 郵便番号は7桁で入力してください（ハイフン不要）';
+    return;
+  }
+  statusEl.className = 'zip-status';
+  statusEl.textContent = '検索中...';
+  try {
+    const res = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${raw}`);
+    const json = await res.json();
+    if (json.results && json.results.length > 0) {
+      const r = json.results[0];
+      const addr = r.address1 + r.address2 + r.address3;
+      document.getElementById('address1').value = addr;
+      document.getElementById('address2').focus();
+      statusEl.className = 'zip-status ok';
+      statusEl.textContent = '✅ 住所が自動入力されました。番地・建物名を続けて入力してください。';
+      // ハイフン付きに整形
+      document.getElementById('zip').value = raw.slice(0,3) + '-' + raw.slice(3);
+    } else {
+      statusEl.className = 'zip-status err';
+      statusEl.textContent = '⚠️ 該当する住所が見つかりませんでした。手動で入力してください。';
+    }
+  } catch {
+    statusEl.className = 'zip-status err';
+    statusEl.textContent = '⚠️ 通信エラーが発生しました。手動で入力してください。';
+  }
+}
+
+// Enterキーでも検索できるように
+document.getElementById('zip').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); lookupZip(); }
+});
+// 7桁入力で自動検索
+document.getElementById('zip').addEventListener('input', function() {
+  const raw = this.value.replace(/[^0-9]/g, '');
+  if (raw.length === 7) lookupZip();
+});
+const selectedParts = new Set();
+document.querySelectorAll('.body-region').forEach(region => {
+  region.addEventListener('click', function() {
+    const part = this.dataset.part;
+    const shape = this.querySelector('.region-shape');
+    if (selectedParts.has(part)) {
+      selectedParts.delete(part);
+      this.classList.remove('selected');
+      // 元の色に戻す（前面か背面かで色分け）
+      const isFront = this.closest('#front-svg-wrap') !== null;
+      if (shape) {
+        shape.setAttribute('fill', isFront ? 'rgba(110,190,140,0.22)' : 'rgba(90,170,120,0.18)');
+        shape.setAttribute('stroke', isFront ? '#7dba9a' : '#6aaa88');
+        shape.setAttribute('stroke-width', '1.5');
+      }
+    } else {
+      selectedParts.add(part);
+      this.classList.add('selected');
+      // 赤色を直接セット
+      if (shape) {
+        shape.setAttribute('fill', 'rgba(217,79,79,0.55)');
+        shape.setAttribute('stroke', '#b83232');
+        shape.setAttribute('stroke-width', '2.5');
+      }
+    }
+    renderTags(); updateProgress();
+  });
+});
+
+function renderTags() {
+  const tagsEl = document.getElementById('selected-tags');
+  const emptyEl = document.getElementById('selected-empty');
+  tagsEl.innerHTML = '';
+  if (selectedParts.size === 0) { emptyEl.style.display = 'block'; }
+  else {
+    emptyEl.style.display = 'none';
+    selectedParts.forEach(part => {
+      const tag = document.createElement('span');
+      tag.className = 'part-tag';
+      tag.innerHTML = `${part} <span class="rm" data-part="${part}">×</span>`;
+      tag.querySelector('.rm').addEventListener('click', function(e) {
+        e.stopPropagation();
+        const p = this.dataset.part;
+        selectedParts.delete(p);
+        document.querySelectorAll(`.body-region[data-part="${p}"]`).forEach(r => r.classList.remove('selected'));
+        renderTags(); updateProgress();
+      });
+      tagsEl.appendChild(tag);
+    });
+  }
+}
+
+function updateProgress() {
+  let filled = 0; const total = 8;
+  if (document.getElementById('name').value.trim()) filled++;
+  if (document.getElementById('kana').value.trim()) filled++;
+  if (document.getElementById('birthday').value) filled++;
+  if (document.querySelector('input[name="gender"]:checked')) filled++;
+  if (document.querySelector('input[name="visit"]:checked')) filled++;
+  if (selectedParts.size > 0) filled++;
+  if (document.querySelector('input[name="pain"]:checked')) filled++;
+  if (document.getElementById('consent').checked) filled++;
+  const pct = Math.round((filled / total) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = pct + '%';
+}
+document.addEventListener('input', updateProgress);
+document.addEventListener('change', updateProgress);
+
+// 条件表示
+document.querySelectorAll('input[name="med"]').forEach(r => r.addEventListener('change', () => {
+  document.getElementById('med_detail_f').style.display = document.querySelector('input[name="med"]:checked')?.value === 'はい' ? 'block' : 'none';
+}));
+document.querySelectorAll('input[name="surg"]').forEach(r => r.addEventListener('change', () => {
+  document.getElementById('surg_detail_f').style.display = document.querySelector('input[name="surg"]:checked')?.value === 'はい' ? 'block' : 'none';
+}));
+document.querySelectorAll('input[name="alg"]').forEach(r => r.addEventListener('change', () => {
+  document.getElementById('alg_detail_f').style.display = document.querySelector('input[name="alg"]:checked')?.value === 'はい' ? 'block' : 'none';
+}));
+
+// ===== SUBMIT =====
+async function submitForm() {
+  // バリデーション
+  const errors = [];
+  if (!document.getElementById('name').value.trim()) errors.push('お名前');
+  if (!document.getElementById('kana').value.trim()) errors.push('フリガナ');
+  if (!document.getElementById('birthday').value) errors.push('生年月日');
+  if (!document.querySelector('input[name="gender"]:checked')) errors.push('性別');
+  if (!document.querySelector('input[name="visit"]:checked')) errors.push('来院歴');
+  if (selectedParts.size === 0) errors.push('痛い部位（体の図をタッチしてください）');
+  if (!document.querySelector('input[name="pain"]:checked')) errors.push('痛みの強さ');
+  if (!document.getElementById('consent').checked) errors.push('個人情報への同意');
+  if (errors.length > 0) { alert('以下の項目をご記入ください：\n・' + errors.join('\n・')); return; }
+
+  // 来院のきっかけ（複数選択）
+  const referrals = [...document.querySelectorAll('#r1,#r2,#r3,#r4,#r5,#r6')]
+    .filter(c => c.checked).map(c => c.value).join('・');
+
+  // 痛みの特徴（複数選択）
+  const painTypes = [...document.querySelectorAll('#s1,#s2,#s3,#s4,#s5,#s6,#s7,#s8')]
+    .filter(c => c.checked).map(c => c.value).join('・');
+
+  // 人体図SVGをBase64画像に変換
+  async function svgToBase64(svgEl) {
+    if (!svgEl) return '';
+    const svgData = new XMLSerializer().serializeToString(svgEl);
+    const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(svgBlob);
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = svgEl.width.baseVal.value * 2;
+        canvas.height = svgEl.height.baseVal.value * 2;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(2, 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(''); };
+      img.src = url;
+    });
+  }
+
+  const frontSvgEl = document.querySelector('#front-svg-wrap svg');
+  const backSvgEl = document.querySelector('#back-svg-wrap svg');
+  const frontImg = await svgToBase64(frontSvgEl);
+  const backImg = await svgToBase64(backSvgEl);
+
+  // データ収集
+  const data = {
+    name:           document.getElementById('name').value.trim(),
+    kana:           document.getElementById('kana').value.trim(),
+    birthday:       document.getElementById('birthday').value,
+    gender:         document.querySelector('input[name="gender"]:checked')?.value || '',
+    tel:            document.getElementById('tel').value.trim(),
+    zip:            document.getElementById('zip').value.trim(),
+    address1:       document.getElementById('address1').value.trim(),
+    address2:       document.getElementById('address2').value.trim(),
+    job:            document.getElementById('job').value,
+    visit:          document.querySelector('input[name="visit"]:checked')?.value || '',
+    referral:       referrals,
+    painParts:      [...selectedParts].join('・'),
+    painLevel:      document.querySelector('input[name="pain"]:checked')?.value || '',
+    duration:       document.querySelector('input[name="dur"]:checked')?.value || '',
+    painType:       painTypes,
+    cause:          document.querySelector('input[name="cause"]:checked')?.value || '',
+    symptomDetail:  document.getElementById('symptom_detail').value.trim(),
+    otherHospital:  document.querySelector('input[name="other_h"]:checked')?.value || '',
+    medicine:       document.querySelector('input[name="med"]:checked')?.value || '',
+    medicineDetail: document.getElementById('med_detail').value.trim(),
+    surgery:        document.querySelector('input[name="surg"]:checked')?.value || '',
+    surgeryDetail:  document.getElementById('surg_detail').value.trim(),
+    allergy:        document.querySelector('input[name="alg"]:checked')?.value || '',
+    allergyDetail:  document.getElementById('alg_detail').value.trim(),
+    sleep:          document.querySelector('input[name="sleep"]:checked')?.value || '',
+    exercise:       document.querySelector('input[name="ex"]:checked')?.value || '',
+    desk:           document.querySelector('input[name="desk"]:checked')?.value || '',
+    pregnant:       document.querySelector('input[name="preg"]:checked')?.value || '',
+    other:          document.getElementById('other').value.trim(),
+    frontImg:       frontImg,
+    backImg:        backImg,
+  };
+
+  // 送信
+  document.getElementById('sending-overlay').classList.add('show');
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('error-box').style.display = 'none';
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    // no-corsのため成功とみなして画面遷移
+    document.getElementById('sending-overlay').classList.remove('show');
+    document.getElementById('questionnaire').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) {
+    document.getElementById('sending-overlay').classList.remove('show');
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('error-box').style.display = 'block';
+  }
+}
+</script>
+</body>
+</html>
