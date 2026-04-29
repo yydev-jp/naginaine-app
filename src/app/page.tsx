@@ -9,7 +9,7 @@ const supabase = createClient(
 );
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbz9mNMvvwDb4ptprvmIz34EC7gHj9Sa79objlLhSeFVBb7esi1sNOOvIOqzuqCEAN_0bw/exec";
+  "https://script.google.com/macros/s/AKfycbz5kGcwK1jKIsxoMkdvN06WsZMTreyIMumZfM7ivtGSYz11t2bwWQnsCWwFJK_OlOE/exec";
 
 // ── ページ1フォーム ────────────────────────────────────
 type FormState = {
