@@ -258,7 +258,10 @@ export default function Home() {
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState(false);
   const [bodyImages, setBodyImages] = useState<{ front: string; back: string }>({ front: "", back: "" });
+  const [fieldErrors, setFieldErrors] = useState<Set<string>>(new Set());
   const composingKanaRef = useRef<string>("");
+
+  const fieldClass = (key: string) => `field${fieldErrors.has(key) ? " field-error" : ""}`;
 
   function hiraganaToKatakana(s: string): string {
     return s.replace(/[ぁ-ゖ]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 0x60));
@@ -344,35 +347,39 @@ export default function Home() {
 
   async function goToPage2() {
     const errors: string[] = [];
-    if (!form.name.trim()) errors.push("お名前");
+    const badFields = new Set<string>();
+    if (!form.name.trim()) { errors.push("お名前"); badFields.add("name"); }
     const kanaConverted = hiraganaToKatakana(form.kana.trim());
     if (kanaConverted !== form.kana.trim()) {
       setForm((f) => ({ ...f, kana: kanaConverted }));
     }
     if (!kanaConverted) {
-      errors.push("フリガナ");
+      errors.push("フリガナ"); badFields.add("kana");
     } else if (!KATAKANA_ALLOWED.test(kanaConverted)) {
-      errors.push("フリガナはカタカナで入力してください（漢字・英数字は使えません）");
+      errors.push("フリガナはカタカナで入力してください（漢字・英数字は使えません）"); badFields.add("kana");
     }
-    if (!form.birthday) errors.push("生年月日");
-    if (!form.gender) errors.push("性別");
-    if (!form.visit) errors.push("来院歴");
-    if (selectedParts.size === 0) errors.push("痛い部位（体の図をタッチしてください）");
-    if (!form.painLevel) errors.push("痛みの強さ");
-    if (!form.consent) errors.push("個人情報への同意");
+    if (!form.birthday) { errors.push("生年月日"); badFields.add("birthday"); }
+    if (!form.gender) { errors.push("性別"); badFields.add("gender"); }
+    if (!form.visit) { errors.push("来院歴"); badFields.add("visit"); }
+    if (selectedParts.size === 0) { errors.push("痛い部位（体の図をタッチしてください）"); badFields.add("painParts"); }
+    if (!form.painLevel) { errors.push("痛みの強さ"); badFields.add("painLevel"); }
+    if (!form.consent) { errors.push("個人情報への同意"); badFields.add("consent"); }
     if (form.referral.includes("ご紹介")) {
       const refConverted = hiraganaToKatakana(form.referrerName.trim());
       if (refConverted !== form.referrerName.trim()) {
         setForm((f) => ({ ...f, referrerName: refConverted }));
       }
       if (!refConverted) {
-        errors.push("紹介者のお名前");
+        errors.push("紹介者のお名前"); badFields.add("referrerName");
       } else if (!KATAKANA_ALLOWED.test(refConverted)) {
-        errors.push("紹介者のお名前はカタカナで入力してください（漢字・英数字は使えません）");
+        errors.push("紹介者のお名前はカタカナで入力してください（漢字・英数字は使えません）"); badFields.add("referrerName");
       }
     }
+    setFieldErrors(badFields);
     if (errors.length > 0) {
-      alert("以下の項目をご記入ください：\n・" + errors.join("\n・"));
+      alert("赤くなっている項目をご確認ください：\n・" + errors.join("\n・"));
+      const firstErrorEl = document.querySelector(".field-error");
+      if (firstErrorEl) firstErrorEl.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
     const frontSvgEl = document.querySelector<SVGSVGElement>("#front-svg-wrap svg");
@@ -590,7 +597,7 @@ export default function Home() {
             <div className="section">
               <div className="section-header">👤 基本情報</div>
               <div className="section-body">
-                <div className="field">
+                <div className={fieldClass("name")}>
                   <label>お名前<span className="required">必須</span></label>
                   <input
                     type="text"
@@ -614,16 +621,16 @@ export default function Home() {
                   />
                 </div>
                 <div className="row">
-                  <div className="field">
+                  <div className={fieldClass("kana")}>
                     <label>フリガナ<span className="required">必須</span><span style={{ fontSize: "12px", color: "var(--accent)", marginLeft: "8px", fontWeight: "normal" }}>カタカナで入力</span></label>
                     <input type="text" placeholder="ヤマダ タロウ" value={form.kana} onChange={(e) => set("kana", e.target.value)} onBlur={(e) => set("kana", hiraganaToKatakana(e.target.value))} />
                   </div>
-                  <div className="field">
+                  <div className={fieldClass("birthday")}>
                     <label>生年月日<span className="required">必須</span></label>
                     <input type="date" value={form.birthday} onChange={(e) => set("birthday", e.target.value)} />
                   </div>
                 </div>
-                <div className="field">
+                <div className={fieldClass("gender")}>
                   <label>性別<span className="required">必須</span></label>
                   <div className="radio-group">
                     {["男性", "女性", "その他"].map((v) => (
@@ -680,7 +687,7 @@ export default function Home() {
             <div className="section">
               <div className="section-header">🚪 来院のきっかけ</div>
               <div className="section-body">
-                <div className="field">
+                <div className={fieldClass("visit")}>
                   <label>初めてのご来院ですか？<span className="required">必須</span></label>
                   <div className="radio-group">
                     {[{ v: "初診", l: "初めて" }, { v: "再診", l: "以前来たことがある" }].map(({ v, l }) => (
@@ -702,8 +709,8 @@ export default function Home() {
                     ))}
                   </div>
                   {form.referral.includes("ご紹介") && (
-                    <div style={{ marginTop: "10px" }}>
-                      <label style={{ fontSize: "13px", color: "var(--accent)", display: "block", marginBottom: "4px" }}>紹介者のお名前（カタカナ）</label>
+                    <div className={fieldClass("referrerName")} style={{ marginTop: "10px", marginBottom: 0 }}>
+                      <label style={{ fontSize: "13px", display: "block", marginBottom: "4px" }}>紹介者のお名前（カタカナ）</label>
                       <input type="text" placeholder="ヤマダ タロウ" value={form.referrerName} onChange={(e) => set("referrerName", e.target.value)} onBlur={(e) => set("referrerName", hiraganaToKatakana(e.target.value))} />
                     </div>
                   )}
@@ -737,7 +744,7 @@ export default function Home() {
             <div className="section">
               <div className="section-header">🩺 症状・お体の状態</div>
               <div className="section-body">
-                <div className="field">
+                <div className={fieldClass("painParts")}>
                   <label>痛い・辛い部位をタッチしてください<span className="required">必須</span></label>
                   <div className="sub-label">前面・背面の体の図を直接タップ。複数選択できます。</div>
                   <div className="body-map-hint">🌿 体の図の部位をタップ → 赤くなったら選択済み</div>
@@ -775,7 +782,7 @@ export default function Home() {
                 </div>
 
                 <hr className="divider" />
-                <div className="field">
+                <div className={fieldClass("painLevel")}>
                   <label>痛みの強さ（1〜10）<span className="required">必須</span></label>
                   <div className="sub-label">1＝ほとんど気にならない　10＝我慢できないほど</div>
                   <div className="pain-scale">
@@ -967,7 +974,7 @@ export default function Home() {
                 <div className="consent-box">
                   ご記入いただいた個人情報は、なぎナイン整骨院における施術・医療サービスの提供のみに使用いたします。第三者への提供は法令に基づく場合を除き行いません。
                 </div>
-                <label className="consent-check">
+                <label className={`consent-check${fieldErrors.has("consent") ? " field-error" : ""}`}>
                   <input type="checkbox" checked={form.consent} onChange={(e) => set("consent", e.target.checked)} />
                   <span>上記の内容を理解し、個人情報の取り扱いに同意します</span>
                 </label>

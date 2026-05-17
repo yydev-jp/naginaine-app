@@ -108,6 +108,15 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 .consent-check input[type="checkbox"] { width: 20px; height: 20px; min-width: 20px; margin-top: 2px; cursor: pointer; accent-color: var(--primary); }
 .consent-check span { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
 
+/* 入力エラー強調 */
+.field-error > label { color: #c62828; }
+.field-error input[type="text"], .field-error input[type="date"], .field-error input[type="tel"], .field-error select, .field-error textarea { border-color: #c62828; background: #fff5f5; }
+.field-error .radio-btn label, .field-error .check-btn label, .field-error .pain-scale-item label { border-color: #c62828; }
+.field-error .selected-parts-display { border-color: #c62828; background: #fff5f5; }
+.consent-check.field-error span { color: #c62828; }
+.consent-check.field-error input[type="checkbox"] { outline: 2px solid #c62828; outline-offset: 2px; border-radius: 2px; }
+.field-error-msg { color: #c62828; font-size: 12px; margin-top: 6px; font-weight: 600; }
+
 .submit-btn { width: 100%; background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--primary-light)); color: white; border: none; padding: 19px; border-radius: var(--radius); font-size: 17px; font-weight: 700; font-family: inherit; letter-spacing: 0.06em; cursor: pointer; box-shadow: 0 5px 22px rgba(74,155,111,0.35); transition: all 0.2s; margin-top: 8px; }
 .submit-btn:active { transform: scale(0.98); }
 .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
