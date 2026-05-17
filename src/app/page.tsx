@@ -360,6 +360,17 @@ export default function Home() {
     if (selectedParts.size === 0) errors.push("痛い部位（体の図をタッチしてください）");
     if (!form.painLevel) errors.push("痛みの強さ");
     if (!form.consent) errors.push("個人情報への同意");
+    if (form.referral.includes("ご紹介")) {
+      const refConverted = hiraganaToKatakana(form.referrerName.trim());
+      if (refConverted !== form.referrerName.trim()) {
+        setForm((f) => ({ ...f, referrerName: refConverted }));
+      }
+      if (!refConverted) {
+        errors.push("紹介者のお名前");
+      } else if (!KATAKANA_ALLOWED.test(refConverted)) {
+        errors.push("紹介者のお名前はカタカナで入力してください（漢字・英数字は使えません）");
+      }
+    }
     if (errors.length > 0) {
       alert("以下の項目をご記入ください：\n・" + errors.join("\n・"));
       return;
@@ -693,7 +704,7 @@ export default function Home() {
                   {form.referral.includes("ご紹介") && (
                     <div style={{ marginTop: "10px" }}>
                       <label style={{ fontSize: "13px", color: "var(--accent)", display: "block", marginBottom: "4px" }}>紹介者のお名前（カタカナ）</label>
-                      <input type="text" placeholder="ヤマダ タロウ" value={form.referrerName} onChange={(e) => set("referrerName", e.target.value)} />
+                      <input type="text" placeholder="ヤマダ タロウ" value={form.referrerName} onChange={(e) => set("referrerName", e.target.value)} onBlur={(e) => set("referrerName", hiraganaToKatakana(e.target.value))} />
                     </div>
                   )}
                   {form.referral.includes("SNS") && (
