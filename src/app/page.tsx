@@ -639,10 +639,10 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="field">
-                  <label>郵便番号</label>
+                  <label>郵便番号<span style={{ fontSize: "12px", color: "var(--accent)", marginLeft: "8px", fontWeight: "normal" }}>ハイフン不要</span></label>
                   <div className="zip-row">
                     <input
-                      type="tel" placeholder="例：123-4567" maxLength={8} inputMode="numeric"
+                      type="tel" placeholder="例：1234567" maxLength={8} inputMode="numeric"
                       value={form.zip}
                       onChange={(e) => {
                         set("zip", e.target.value);
