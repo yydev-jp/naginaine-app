@@ -615,7 +615,7 @@ export default function Home() {
                 </div>
                 <div className="row">
                   <div className="field">
-                    <label>フリガナ<span className="required">必須</span></label>
+                    <label>フリガナ<span className="required">必須</span><span style={{ fontSize: "12px", color: "var(--accent)", marginLeft: "8px", fontWeight: "normal" }}>カタカナで入力</span></label>
                     <input type="text" placeholder="ヤマダ タロウ" value={form.kana} onChange={(e) => set("kana", e.target.value)} onBlur={(e) => set("kana", hiraganaToKatakana(e.target.value))} />
                   </div>
                   <div className="field">
