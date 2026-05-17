@@ -264,6 +264,8 @@ export default function Home() {
     return s.replace(/[ぁ-ゖ]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 0x60));
   }
 
+  const KATAKANA_ALLOWED = /^[ァ-ヶー・　 ]+$/;
+
   const set = (key: keyof FormState, val: string | boolean | string[]) =>
     setForm((f) => ({ ...f, [key]: val }));
 
@@ -343,7 +345,15 @@ export default function Home() {
   async function goToPage2() {
     const errors: string[] = [];
     if (!form.name.trim()) errors.push("お名前");
-    if (!form.kana.trim()) errors.push("フリガナ");
+    const kanaConverted = hiraganaToKatakana(form.kana.trim());
+    if (kanaConverted !== form.kana.trim()) {
+      setForm((f) => ({ ...f, kana: kanaConverted }));
+    }
+    if (!kanaConverted) {
+      errors.push("フリガナ");
+    } else if (!KATAKANA_ALLOWED.test(kanaConverted)) {
+      errors.push("フリガナはカタカナで入力してください（漢字・英数字は使えません）");
+    }
     if (!form.birthday) errors.push("生年月日");
     if (!form.gender) errors.push("性別");
     if (!form.visit) errors.push("来院歴");
@@ -595,7 +605,7 @@ export default function Home() {
                 <div className="row">
                   <div className="field">
                     <label>フリガナ<span className="required">必須</span></label>
-                    <input type="text" placeholder="ヤマダ タロウ" value={form.kana} onChange={(e) => set("kana", e.target.value)} />
+                    <input type="text" placeholder="ヤマダ タロウ" value={form.kana} onChange={(e) => set("kana", e.target.value)} onBlur={(e) => set("kana", hiraganaToKatakana(e.target.value))} />
                   </div>
                   <div className="field">
                     <label>生年月日<span className="required">必須</span></label>
