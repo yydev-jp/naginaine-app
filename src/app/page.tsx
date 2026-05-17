@@ -9,13 +9,13 @@ const supabase = createClient(
 );
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbz5kGcwK1jKIsxoMkdvN06WsZMTreyIMumZfM7ivtGSYz11t2bwWQnsCWwFJK_OlOE/exec";
+  "https://script.google.com/macros/s/AKfycbztSnfrP1pyAOPz-UIKn3XAAi-ZJKRybLhsRFQfOroYid_ts9Ebk01lTtZeo28TuFS1/exec";
 
 // ── ページ1フォーム ────────────────────────────────────
 type FormState = {
   name: string; kana: string; birthday: string; gender: string; tel: string;
   zip: string; address1: string; address2: string; job: string; visit: string;
-  referral: string[]; referrerName: string; painLevel: string; duration: string; painTypes: string[];
+  referral: string[]; referrerName: string; snsChannels: string[]; snsOther: string; referralOther: string; painLevel: string; duration: string; painTypes: string[];
   cause: string; symptomDetail: string; otherHospital: string; medicine: string;
   medicineDetail: string; surgery: string; surgeryDetail: string; allergy: string;
   allergyDetail: string; sleep: string; exercise: string; desk: string;
@@ -25,7 +25,7 @@ type FormState = {
 const initialForm: FormState = {
   name: "", kana: "", birthday: "", gender: "", tel: "",
   zip: "", address1: "", address2: "", job: "", visit: "",
-  referral: [], referrerName: "", painLevel: "", duration: "", painTypes: [],
+  referral: [], referrerName: "", snsChannels: [], snsOther: "", referralOther: "", painLevel: "", duration: "", painTypes: [],
   cause: "", symptomDetail: "", otherHospital: "", medicine: "",
   medicineDetail: "", surgery: "", surgeryDetail: "", allergy: "",
   allergyDetail: "", sleep: "", exercise: "", desk: "",
@@ -381,7 +381,21 @@ export default function Home() {
     ].filter(Boolean).join("・");
 
     const referralStr = form.referral
-      .map((r) => (r === "ご紹介" && form.referrerName.trim() ? `ご紹介（${form.referrerName.trim()}）` : r))
+      .map((r) => {
+        if (r === "ご紹介" && form.referrerName.trim()) {
+          return `ご紹介（${form.referrerName.trim()}）`;
+        }
+        if (r === "SNS" && form.snsChannels.length > 0) {
+          const channels = form.snsChannels
+            .map((c) => (c === "その他" && form.snsOther.trim() ? `その他：${form.snsOther.trim()}` : c))
+            .join(", ");
+          return `SNS（${channels}）`;
+        }
+        if (r === "その他" && form.referralOther.trim()) {
+          return `その他（${form.referralOther.trim()}）`;
+        }
+        return r;
+      })
       .join("・");
 
     const data = {
@@ -670,6 +684,28 @@ export default function Home() {
                     <div style={{ marginTop: "10px" }}>
                       <label style={{ fontSize: "13px", color: "var(--accent)", display: "block", marginBottom: "4px" }}>紹介者のお名前（カタカナ）</label>
                       <input type="text" placeholder="ヤマダ タロウ" value={form.referrerName} onChange={(e) => set("referrerName", e.target.value)} />
+                    </div>
+                  )}
+                  {form.referral.includes("SNS") && (
+                    <div style={{ marginTop: "10px" }}>
+                      <label style={{ fontSize: "13px", color: "var(--accent)", display: "block", marginBottom: "4px" }}>どのSNSですか？（複数選択可）</label>
+                      <div className="check-group">
+                        {["Instagram","TikTok","YouTube","X(旧Twitter)","Facebook","その他"].map((v) => (
+                          <div className="check-btn" key={v}>
+                            <input type="checkbox" id={`sns-${v}`} value={v} checked={form.snsChannels.includes(v)} onChange={() => set("snsChannels", toggleArr(form.snsChannels, v))} />
+                            <label htmlFor={`sns-${v}`}>{v}</label>
+                          </div>
+                        ))}
+                      </div>
+                      {form.snsChannels.includes("その他") && (
+                        <input type="text" placeholder="その他のSNS名（例：Threads、LINE VOOM）" value={form.snsOther} onChange={(e) => set("snsOther", e.target.value)} style={{ marginTop: "6px" }} />
+                      )}
+                    </div>
+                  )}
+                  {form.referral.includes("その他") && (
+                    <div style={{ marginTop: "10px" }}>
+                      <label style={{ fontSize: "13px", color: "var(--accent)", display: "block", marginBottom: "4px" }}>きっかけを具体的に</label>
+                      <input type="text" placeholder="例：友人のブログ、テレビ番組など" value={form.referralOther} onChange={(e) => set("referralOther", e.target.value)} />
                     </div>
                   )}
                 </div>
